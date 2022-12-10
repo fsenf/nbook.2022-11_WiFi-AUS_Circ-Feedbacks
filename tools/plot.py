@@ -81,7 +81,7 @@ def plot_diff(vin, method = 'timemean', ylabel = None, title = None):
 ######################################################################
 ######################################################################
 
-def plot_diff_ts(vin, method = 'globalmean', style = 'errorbar', add_nudged = False):
+def plot_diff_ts(vin, method = 'globalmean', style = 'errorbar', add_nudged = False, relative = False):
 
     time = np.array( [1,2,3] )
     v = vin.resample({'time':'1M'}).mean() 
@@ -109,7 +109,13 @@ def plot_diff_ts(vin, method = 'globalmean', style = 'errorbar', add_nudged = Fa
         # upper & lower bounds
         dv = stats.sel( mode = mode, stats = 'confidence' ).squeeze()
 
-    
+        if relative:
+            vref = stats.sel( mode = mode, stats = 'reference').squeeze()
+            
+            vm = 100 * vm / vref
+            dv = 100 * dv / vref
+            
+            
         #line, = 
         if style == 'errorbar':
             plt.errorbar(time + 0.1*(i-2), vm, yerr = dv, marker = 'o', lw = 1)
@@ -130,8 +136,13 @@ def plot_diff_ts(vin, method = 'globalmean', style = 'errorbar', add_nudged = Fa
         plt.gca().set_prop_cycle(None)
         i = 0
         for mode in modelist:
-            diff = (v.sel(ensemble='nudged', mode = mode) - v.sel(ensemble='nudged', mode = 'fire0.0')).squeeze()
+            vref = v.sel(ensemble='nudged', mode = 'fire0.0').squeeze()
+            diff = (v.sel(ensemble='nudged', mode = mode) - vref).squeeze()
 #            plt.plot(time + 0.15*(i-2.1), diff, marker = '*', lw = 0, ms = 20, mew = 2, mfc = 'w')
+
+            if relative:
+                diff = 100*diff / vref
+            
             plt.bar(time + 0.15*(i-2.), diff, width = 0.04, alpha = 0.3)
             i += 1
                     
