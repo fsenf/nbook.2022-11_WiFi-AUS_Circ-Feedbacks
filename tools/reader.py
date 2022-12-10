@@ -111,7 +111,7 @@ def read_wifiaus_inner( data_dir, file_type = 'echam', run_type = 'nudged', aver
         filelist = sorted( glob.glob( f'{subdir}/POSTPROC/{average_type}*{file_type}.nc' ) )
         
         if len( filelist ) > 0:
-            d = xr.open_mfdataset( filelist )
+            d = xr.open_mfdataset( filelist,  parallel=True )
 
             if run_type == 'nudged':
                 d = d.expand_dims( ('mode', 'ensemble') )
