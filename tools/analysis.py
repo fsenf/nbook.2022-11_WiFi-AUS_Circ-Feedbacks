@@ -56,7 +56,7 @@ def calc_stream_function( v, dset, method = 'p-coordinate', invert_p = True):
             vm_re = vm
 
         # calculate the vertical integral
-        fac = - 1 / g
+        fac = 1 / g
         integral = fac * vm_re.cumulative_integrate('plev').where( pressure_mask ) # .sel ( time = '2020-01').mean('time')
         
 
