@@ -4,6 +4,7 @@ import numpy as np
 import pylab as plt
 import seaborn as sns
 import matplotlib.colors as mcol
+import xarray as xr
 
 from analysis import glob_mean, sh_mean, nh_mean, ens_stat
 
@@ -78,6 +79,7 @@ def set_levs(nmax, depth, largest = 5, sym = True, sign = True, zmax = 'None'):
 def forcing_overview_plot(forc_stats, stats_method = 'ensemble', alpha_method = 'confidence', only_plot_modemean = False,
                           add_nudged = False, ylim = 1, title = None, ylabel = None, ax = None, legend_labelsize = 16,
                           print_condition_label = True,
+                          global_values = False,
                           varnames = ['IRF_sw', 'Adj_sw', 'ERF_sw', 'IRF_lw', 'Adj_lw', 'ERF_lw', 'IRF_net', 'Adj_net', 'ERF_net',],
                           colors = ['xkcd:sun yellow', 'gold', 'orange', 'tab:red', 'darkred', 'purple', 'yellowgreen', 'forestgreen', 'darkgreen']):
 
@@ -196,7 +198,8 @@ def forcing_overview_plot(forc_stats, stats_method = 'ensemble', alpha_method = 
         latlabel_points = np.array( latlabel_points )
         latlabel_points -= latlabel_points[0]/2
         
-        plt.xticks(latlabel_points, ['Southern Hemisphere', 'Tropics', 'Northern Hemisphere'], fontsize = 18) 
+        if not global_values:
+            plt.xticks(latlabel_points, ['Southern Hemisphere', 'Tropics', 'Northern Hemisphere'], fontsize = 18) 
         plt.ylim(-ylim, ylim)
         if ylabel is None:
             plt.ylabel('Forcing \n (W m${}^{-2}$)' )
