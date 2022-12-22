@@ -56,7 +56,7 @@ def calc_stream_function( v, dset, method = 'p-coordinate', invert_p = True):
             vm_re = vm
 
         # calculate the vertical integral
-        fac = 1 / g
+        fac =  1 / g
         integral = fac * vm_re.cumulative_integrate('plev').where( pressure_mask ) # .sel ( time = '2020-01').mean('time')
         
 
@@ -345,9 +345,16 @@ def stats_and_nudged( v ):
     
     v_nudged = v.sel(ensemble = 'nudged')
     v_nudged = v_nudged.expand_dims('stats')
-    v_nudged['stats'] = ['nudged',]
-    dv_nudged = v_nudged.sel( mode = v_stats.mode ) - v_nudged.sel( mode = 'fire0.0' )
-    v_stats = xr.concat( [v_stats, dv_nudged], dim = 'stats')                            
+
+    v_nudged_ref = v_nudged.sel( mode = 'fire0.0' )
+    dv_nudged = v_nudged.sel( mode = v_stats.mode ) - v_nudged_ref
+
+    dv_nudged['stats'] = ['nudged',]
+    
+    v_nudged_ref = v_nudged_ref * xr.ones_like( dv_nudged )   # get the right shape, incl. modes
+    v_nudged_ref['stats'] = ['nudged-reference',]
+    
+    v_stats = xr.concat( [v_stats, dv_nudged, v_nudged_ref], dim = 'stats')                            
         
     
     return v_stats.squeeze()
@@ -391,9 +398,53 @@ def nh_mean( v ):
 ######################################################################
 ######################################################################
 
+def averaged_dset_for_latranges( d, latranges ):
+
+    drange = []
+    for latrange in latranges:
+            ds = d.sel( lat = slice(*latrange) )
+            d_weighted_ave = weighted_mean( ds )
+            d_weighted_ave = d_weighted_ave.expand_dims('latrange')
+            d_weighted_ave['latrange'] = [str(latrange),]
+
+            drange +=[ d_weighted_ave, ]
+
+    drange = xr.concat( drange, dim = 'latrange')
+    return drange
+
+
 
 ######################################################################
 ######################################################################
+
+
+def averaged_dset( d, diving_lat = 20 ):
+
+
+    if type( diving_lat ) == type(20):
+        # lat is stored backwards
+        sh_range = [-diving_lat, -90]
+        tropics_range = [diving_lat, -diving_lat]
+        nh_range = [90, diving_lat]
+        
+        latranges = [sh_range, tropics_range, nh_range]
+        
+    else:
+        lats = np.hstack([-90, diving_lat, 90])
+
+        nlats = len( lats )
+        
+        latranges = []
+        for i in range( nlats - 1):
+            
+            i1 = i + 1
+            i2 = i
+            
+            lrange = [ lats[i1], lats[i2] ]
+            latranges +=[ lrange, ]
+            
+    return averaged_dset_for_latranges( d, latranges )
+
 
 ######################################################################
 ######################################################################
