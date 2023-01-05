@@ -8,6 +8,22 @@ import xarray as xr
 
 from analysis import glob_mean, sh_mean, nh_mean, ens_stat
 
+
+
+######################################################################
+######################################################################
+
+def standardize_firenames( modes ):
+    
+    mlist = []
+    for mode in modes:
+        old_name = str( mode )
+        new_name = old_name.upper()[:-2]
+        
+        mlist += [new_name, ]
+        
+    return  mlist
+
 ######################################################################
 ######################################################################
 
@@ -267,7 +283,7 @@ def plot_diff(vin, method = 'timemean', ylabel = None, title = None):
         v1 = stats.sel( mode = mode, stats = 'lower' ).squeeze()
         v2 = stats.sel( mode = mode, stats = 'upper' ).squeeze()
         
-        line, = plt.plot(lat, vm, lw = 5)
+        line, = plt.plot(lat, vm, lw = 5, label = str( mode.data ) )
         plt.fill_between( lat, v1, v2, alpha = 0.2, color = line.get_color() )
     
     plt.xlabel( 'latitude / (deg N)')

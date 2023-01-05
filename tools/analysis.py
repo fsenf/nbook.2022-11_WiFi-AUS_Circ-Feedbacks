@@ -357,7 +357,7 @@ def stats_and_nudged( v ):
     v_stats = xr.concat( [v_stats, dv_nudged, v_nudged_ref], dim = 'stats')                            
         
     
-    return v_stats.squeeze()
+    return v_stats #.squeeze()
 
 ######################################################################
 ######################################################################
