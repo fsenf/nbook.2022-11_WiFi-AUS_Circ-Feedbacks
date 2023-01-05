@@ -7,6 +7,8 @@
     - does it make sense to use hard links here?
 
 
+## Done
+
 * start git version control
 
-# Done
+
