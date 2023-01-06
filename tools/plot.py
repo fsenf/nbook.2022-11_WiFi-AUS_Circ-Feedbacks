@@ -346,7 +346,7 @@ def plot_diff_ts(vin, method = 'globalmean', style = 'errorbar', add_nudged = Fa
         if style == 'errorbar':
             plt.errorbar(time + 0.1*(i-2), vm, yerr = dv, marker = 'o', lw = 1)
         elif style == 'bar':
-            plt.bar(time + 0.15*(i-1.5), vm, width = 0.08, yerr = dv, lw = 1, error_kw = {'alpha': 0.3, 'color':'lightgray', 'lw': 1} )
+            plt.bar(time + 0.15*(i-1.5), vm, width = 0.08, yerr = dv, lw = 1, error_kw = {'alpha': 0.3, 'color':'lightgray', 'lw': 1}, label = str( mode.data ) )
         
         i += 1
         
@@ -369,7 +369,7 @@ def plot_diff_ts(vin, method = 'globalmean', style = 'errorbar', add_nudged = Fa
             if relative:
                 diff = 100*diff / vref
             
-            plt.bar(time + 0.15*(i-2.), diff, width = 0.04, alpha = 0.3)
+            plt.bar(time + 0.15*(i-2.), diff, width = 0.04, alpha = 0.3, label = str( mode.data ))
             i += 1
                     
     
