@@ -25,6 +25,35 @@ Omega = 2 * np.pi / day
 
 def calc_stream_function(v, dset, method="p-coordinate", invert_p=True):
 
+    """
+
+    Calculates mass stream function.
+
+
+    Parameters
+    ----------
+    v : xr.DataArray
+        meridonal velocity already averaged (time, lon)
+
+    dset : xr.Dataset
+        this dataset need to contain surface pressure
+
+    method : {"p-coordinate", "z-coordinate"}, optional
+         switch between different vertical coordinates
+
+         - "z-coordinate": height coordinate, currently broken!
+         - "p-coordinate": pressure coordinate
+
+    invert_p : {True, False}
+         if pressure coordinate is inverted
+
+
+    Returns
+    -------
+    Psi : xr.DataArray
+        mass streamfunction
+    """
+
     # define constants and coordinates
     phi = np.deg2rad(v.lat)
     cosphi = np.cos(phi)
@@ -82,6 +111,10 @@ def calc_stream_function(v, dset, method="p-coordinate", invert_p=True):
 def calc_vstar(dset):
 
     """
+
+    Calculates residual meridional velocity.
+
+
     Parameters
     ----------
     dset : xarray.Dataset
@@ -132,6 +165,7 @@ def calc_vstar(dset):
 def horizontal_divergence(f, latitude_name="lat", exponent=1):
 
     """
+
     Calculates horizontal divergence (only meridional direction) of a flux f.
 
 
@@ -139,6 +173,12 @@ def horizontal_divergence(f, latitude_name="lat", exponent=1):
     ----------
     f : xr.DataArray
         input flux
+
+    latitude_name : string, optional
+        name of latitude in `f`
+
+    exponent : integer, optional
+        exponent of cosphi, maybe quadratic of tensor products
 
 
     Returns
@@ -169,6 +209,27 @@ def horizontal_divergence(f, latitude_name="lat", exponent=1):
 
 def calculate_eddy_omega(d, level_name="plev"):
 
+    """
+
+    Calculates eddy part of residual pressure velocity.
+
+
+    Parameters
+    ----------
+    d : xr.Dataset
+        complete dataset containing wind and pot. temperature
+
+    level_name : string, optional
+        name of the vertical level coordinate
+
+
+    Returns
+    -------
+    omega_e : xr.DataArray
+        eddy part of residual pressure velocity
+
+    """
+
     # calculate heat flux
     v = d["v"]
     theta = d["tpot"]
@@ -197,6 +258,25 @@ def calculate_eddy_omega(d, level_name="plev"):
 def calculate_residual_omega(d, level_name="plev"):
 
     """
+
+    Calculates residual pressure velocity.
+
+
+    Parameters
+    ----------
+    d : xr.Dataset
+        complete dataset containing wind and pot. temperature
+
+    level_name : string, optional
+        name of the vertical level coordinate
+
+
+    Returns
+    -------
+    omega_star : xr.DataArray
+        residual pressure velocity
+
+
     Notes
     -----
     This formula is implemented
@@ -224,9 +304,24 @@ def calculate_residual_omega(d, level_name="plev"):
 ######################################################################
 
 
-def calc_meridional_EPF(
-    d,
-):
+def calc_meridional_EPF(d):
+
+    """
+    Calculates meridional component of Eliassen-Palm Flux (EPF). 
+
+
+    Parameters
+    ----------
+    d : xr.Dataset
+        complete dataset containing winds
+
+
+    Returns
+    -------
+    EPF_phi : xr.DataArray
+        meridional EPF component.
+
+    """
 
     # define coordinates
     phi = np.deg2rad(d.lat)
@@ -248,9 +343,25 @@ def calc_meridional_EPF(
 ######################################################################
 
 
-def calc_vertical_EPF(
-    d,
-):
+def calc_vertical_EPF(d):
+ 
+    """
+    Calculates vertical component of Eliassen-Palm Flux (EPF). 
+
+
+    Parameters
+    ----------
+    d : xr.Dataset
+        complete dataset containing winds and pot. temperature
+
+
+    Returns
+    -------
+    EPF_p : xr.DataArray
+        vertical EPF component.
+
+    """
+
 
     # define coordinates
     phi = np.deg2rad(d.lat)
@@ -278,9 +389,25 @@ def calc_vertical_EPF(
 ######################################################################
 
 
-def EPF_divergence(
-    d,
-):
+def EPF_divergence(d):
+
+    """
+    Calculates divergence of Eliassen-Palm Flux (EPF). 
+
+
+    Parameters
+    ----------
+    d : xr.Dataset
+        complete dataset containing winds and pot. temperature
+
+
+    Returns
+    -------
+    div_EPF : xr.DataArray
+        divergence of EPF
+
+    """
+
 
     # define coordinates
     phi = np.deg2rad(d.lat)
@@ -309,6 +436,24 @@ def EPF_divergence(
 
 
 def ens_stat(vin):
+
+    """
+    Calculates ensemble statistics.
+
+
+    Parameters
+    ----------
+    vin : xr.Dataset
+        input data with an ensemble dimension
+
+
+    Returns
+    -------
+    vstat : xr.Dataset
+        ensemble statistics gathered along the new 
+        coordinate `stats`
+
+    """
 
     v = vin.drop_sel({"ensemble": "nudged"})
 
@@ -363,6 +508,26 @@ def ens_stat(vin):
 
 def stats_and_nudged(v):
 
+    """
+    Combines ensembles statistics with nudged data.
+
+
+    Parameters
+    ----------
+    v : xr.Dataset
+        input data with an ensemble dimension
+
+
+    Returns
+    -------
+    vstat : xr.Dataset
+        ensemble statistics gathered along the new 
+        coordinate `stats` + nudged data included there as well
+
+
+
+    """
+
     v_stats = ens_stat(v)
 
     v_nudged = v.sel(ensemble="nudged")
@@ -392,6 +557,22 @@ def stats_and_nudged(v):
 
 
 def weighted_mean(v):
+    
+    """
+    Calculates mean weighted by cos(phi) (proportional to surface area on Earth).
+
+
+    Parameters
+    ----------
+    v : xr.Dataset
+        input data
+
+
+    Returns
+    -------
+    v_mean : xr.Dataset
+        data averaged along latitude with area weight
+    """
 
     lat = v.lat
     phi = np.deg2rad(lat)
@@ -409,6 +590,28 @@ def weighted_mean(v):
 
 
 def glob_mean(v):
+
+    """
+    Calculates global mean.
+
+
+    Parameters
+    ----------
+    v : xr.Dataset
+        input data
+
+
+    Returns
+    -------
+    vm : xr.Dataset
+        globally averaged data
+
+
+    Notes
+    -----
+    weighted by cos(phi) (proportional to surface area on Earth).
+    """
+
     return weighted_mean(v)
 
 
@@ -417,6 +620,28 @@ def glob_mean(v):
 
 
 def sh_mean(v):
+
+    """
+    Calculates Southern hemispheric mean.
+
+
+    Parameters
+    ----------
+    v : xr.Dataset
+        input data
+
+
+    Returns
+    -------
+    vm : xr.Dataset
+        globally averaged data
+
+
+    Notes
+    -----
+    weighted by cos(phi) (proportional to surface area on Earth).
+    """
+
     vs = v.sel(lat=slice(0, -90))
     return weighted_mean(vs)
 
@@ -426,6 +651,29 @@ def sh_mean(v):
 
 
 def nh_mean(v):
+
+
+    """
+    Calculates Northern hemispheric mean.
+
+
+    Parameters
+    ----------
+    v : xr.Dataset
+        input data
+
+
+    Returns
+    -------
+    vm : xr.Dataset
+        globally averaged data
+
+
+    Notes
+    -----
+    weighted by cos(phi) (proportional to surface area on Earth).
+    """
+
     vs = v.sel(lat=slice(90, 0))
     return weighted_mean(vs)
 
@@ -435,6 +683,36 @@ def nh_mean(v):
 
 
 def averaged_dset_for_latranges(d, latranges):
+
+    """
+    Calculates averages for predefined latitude ranges.
+
+
+    Parameters
+    ----------
+    v : xr.Dataset
+        input data
+
+    latranges : list of list
+        list of latitude ranges 
+        
+        - structure `[[lat1, lat2], [lat2, lat3], ...]`
+        - sort from North to South for ECHAM!
+
+
+    Returns
+    -------
+    drange : xr.Dataset
+        data averaged over latitude bands
+
+        - new coordinate `latrange`is introduced
+        - latrange is converted to string and used as key
+
+
+    Notes
+    -----
+    weighted by cos(phi) (proportional to surface area on Earth).
+    """
 
     drange = []
     for latrange in latranges:
@@ -458,6 +736,33 @@ def averaged_dset_for_latranges(d, latranges):
 
 
 def averaged_dset(d, diving_lat=20):
+    
+    """
+    Calculates averages for three predefined latitude ranges. Ranges are divided such that
+    (90°S - phi°S, phi°S - phi°N, phi°N - 90°N) results wher phi is the `diving_lat`.
+
+
+    Parameters
+    ----------
+    v : xr.Dataset
+        input data
+
+    diving_lat : float, optional
+        dividing latitude
+
+    Returns
+    -------
+    drange : xr.Dataset
+        data averaged over latitude bands
+
+        - new coordinate `latrange`is introduced
+        - latrange is converted to string and used as key
+
+
+    Notes
+    -----
+    weighted by cos(phi) (proportional to surface area on Earth).
+    """
 
     if type(diving_lat) == type(20):
         # lat is stored backwards
@@ -489,16 +794,3 @@ def averaged_dset(d, diving_lat=20):
 ######################################################################
 ######################################################################
 
-
-######################################################################
-######################################################################
-
-######################################################################
-######################################################################
-
-
-######################################################################
-######################################################################
-
-######################################################################
-######################################################################
