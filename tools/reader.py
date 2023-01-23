@@ -14,20 +14,28 @@ xr.set_options(keep_attrs=True)
 def open_ppecham_data(expname, data_type="rad", average_type="zonmean"):
 
     """
-    Open Wifi-AUS time mean data for a certain experiment.
-
+    
+    OUTDATED:   Open Wifi-AUS time mean data for a certain experiment.
 
     Parameters
     ----------
     expname : str
-       name of experiment subpatch, e.g.
-       * 'wifiaus_ham_long_nu_gfas2020_inj14km_dj_ao_iaer0'
-       * 'wifiaus_ham_long_nu_gfas2020_inj14km_dj_ao'
+        name of experiment subpatch, e.g.
+        * 'wifiaus_ham_long_nu_gfas2020_inj14km_dj_ao_iaer0'
+        * 'wifiaus_ham_long_nu_gfas2020_inj14km_dj_ao'
+    
+    data_type : str, optional
+         (Default value = "rad")
+
+    average_type : str, optional
+         (Default value = "zonmean")
+
 
     Returns
     -------
-    dset : xarray Dataset
-        time-mean wifi dataset
+    dset : xr.Dataset
+        input data
+    
     """
 
     data_path = "%s/wifi-aus/%s" % (os.environ["LOCAL_DATA_PATH"], expname)
@@ -58,6 +66,35 @@ def open_ppecham_from_explist(
     data_type="rad",
     average_type="zonmean",
 ):
+    """
+    OUTDATED:   Open WiFi-AUS experiments from a experiment list.
+
+    Parameters
+    ----------
+    explist :
+        
+    add_height : {True, False}, optional
+        switch if height info is added
+        (Default value = True)
+
+    height_type : {"full", "half"}, optional
+        set either full or half level for a consistent level notation
+        (Default value = "full")
+
+    data_type : str, optional
+        type of data stream read
+        (Default value = "rad")
+
+    average_type : str, optional
+        shortcut for averaged data
+        (Default value = "zonmean")
+
+    Returns
+    -------
+    dset : xr.Dataset
+        input data
+ 
+    """
 
     dlist = []
 
@@ -90,6 +127,24 @@ def open_ppecham_from_explist(
 
 
 def get_mean_geoptential_height(averaging_dims=("time", "lat", "lon")):
+    """
+    OUTDATED : Input geopotential height.
+
+
+    Parameters
+    ----------
+    averaging_dims : tuple or list, optional
+       list of dimensions for which averaging is done 
+
+
+    Returns
+    -------
+    height : xr.DataArray
+        full height levels
+
+    half_height : xr.DataArray
+        half height levels
+    """
 
     gfile = "/work/bb0883/m300279/WIFIAUS/wifiaus_ham_long_nu_gfas2020_inj14km_dj_ao/wifiaus_ham_long_nu_gfas2020_inj14km_dj_ao_202001.01_vphysc.nc"
 
@@ -115,6 +170,46 @@ def get_mean_geoptential_height(averaging_dims=("time", "lat", "lon")):
 def read_wifiaus_inner(
     data_dir, file_type="echam", run_type="nudged", average_type="zonmean"
 ):
+    """
+    Helper function to read WiFi-AUS data.
+
+
+    Parameters
+    ----------
+    data_dir : str
+        main data directory from which sub-directories 
+        (each containing POSTPROC folders) are searched
+        
+    file_type : str, optional
+        selects file type, i.e. ECHAM output stream (last part of filenames)
+        (Default value = "echam")
+
+    run_type : {"nudged", "ensemble"}, optional
+        swtiches input methods between nudged and ensemble data
+        (Default value = "nudged")
+
+    average_type : {"zonmean", "tmean", "tzmean"}, optional
+        Type of data to which averaging had been applied before.
+
+        * "zonmean" : zonal average, hourly data
+        * "tmean" : monthly data
+        * "tzmean" : monthly and zonally mean data
+        (Default value = "zonmean")
+        
+
+    Returns
+    -------
+    dset : xr.Dataset
+        input data
+
+
+    Notes
+    -----
+    Nudged and ensemble data have different data depths, i.e. there is an additional
+    sub-directory for each ensmeble member. The structure is
+    `{data_dir}/{fire_mode}/{ens_spec}/POSTPROC/{echamfile}.nc`
+
+    """
 
     subdir_list = sorted(glob.glob(f"{data_dir}/*"))
 
@@ -157,6 +252,41 @@ def read_wifiaus_inner(
 
 def read_wifiaus_nudged(data_dir, file_type="echam", average_type="zonmean"):
 
+    """
+    Reads nudged WiFi-AUS data.
+
+
+    Parameters
+    ----------
+    data_dir : str
+        main data directory from which sub-directories 
+        (each containing POSTPROC folders) are searched
+        
+    file_type : str, optional
+        selects file type, i.e. ECHAM output stream (last part of filenames)
+        (Default value = "echam")
+
+    average_type : {"zonmean", "tmean", "tzmean"}, optional
+        Type of data to which averaging had been applied before.
+
+        * "zonmean" : zonal average, hourly data
+        * "tmean" : monthly data
+        * "tzmean" : monthly and zonally mean data
+        (Default value = "zonmean")
+        
+
+    Returns
+    -------
+     : xr.Dataset
+        input data
+
+
+    Notes
+    -----
+    A new dimension "ensemble" is introduced such that nudged data can be treated 
+    in a similar way as ensemble members.
+    """
+
     return read_wifiaus_inner(
         data_dir, file_type=file_type, run_type="nudged", average_type=average_type
     )
@@ -167,6 +297,36 @@ def read_wifiaus_nudged(data_dir, file_type="echam", average_type="zonmean"):
 
 
 def read_wifiaus_ensemble(data_dir, file_type="echam", average_type="zonmean"):
+
+    """
+    Reads ensemble WiFi-AUS data.
+
+
+    Parameters
+    ----------
+    data_dir : str
+        main data directory from which sub-directories 
+        (each containing POSTPROC folders) are searched
+        
+    file_type : str, optional
+        selects file type, i.e. ECHAM output stream (last part of filenames)
+        (Default value = "echam")
+
+    average_type : {"zonmean", "tmean", "tzmean"}, optional
+        Type of data to which averaging had been applied before.
+
+        * "zonmean" : zonal average, hourly data
+        * "tmean" : monthly data
+        * "tzmean" : monthly and zonally mean data
+        (Default value = "zonmean")
+        
+
+    Returns
+    -------
+    dset : xr.Dataset
+        input data
+    """
+
 
     subdir_list = sorted(glob.glob(f"{data_dir}/*"))
 
@@ -203,6 +363,39 @@ def read_wifiaus_combination(
     average_type="zonmean",
     time_range=slice("2020-01", "2020-03"),
 ):
+    """
+    Wrapper that reads both, nudged and ensemble data.
+
+
+    Parameters
+    ----------
+    base_data_dir : str, optional
+        base path under which nudged and ensemble data are stored
+         (Default value = "/work/bb1262/data/echam-ham/wifi-aus/")
+
+    file_type : str, optional
+        selects file type, i.e. ECHAM output stream (last part of filenames)
+        (Default value = "echam")
+
+    average_type : {"zonmean", "tmean", "tzmean"}, optional
+        Type of data to which averaging had been applied before.
+
+        * "zonmean" : zonal average, hourly data
+        * "tmean" : monthly data
+        * "tzmean" : monthly and zonally mean data
+        (Default value = "zonmean")
+ 
+    time_range : slice, optional
+        Time slices to be applied to all data
+        (Default value = slice("2020-01", "2020-03"))
+        
+
+    Returns
+    -------
+    dset : xr.Dataset
+        input data
+ 
+    """
     # ### Open Nudged Data
     data_dir = f"{base_data_dir}/wifiaus_ham_long_nu_gfas2020_injtrp+1_pcb_ao"
 
@@ -230,6 +423,22 @@ def read_wifiaus_combination(
 
 
 def wifiaus_add_vars(dset):
+
+    """
+    Adds some net TOA radiation fluxes to the data. 
+
+    Parameters
+    ----------
+    dset : xr.Dataset
+        in-/output dataset, needs to include TOA radiation fluxes
+        
+
+    Returns
+    -------
+    dset : xr.Dataset
+        output is written onto input
+
+    """
 
     # ## Add Variables
     # ### Net ERF
