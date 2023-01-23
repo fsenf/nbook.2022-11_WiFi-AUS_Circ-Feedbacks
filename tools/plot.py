@@ -15,6 +15,23 @@ from analysis import glob_mean, sh_mean, nh_mean, ens_stat
 
 def standardize_firenames(modes):
 
+    """
+    Converts fire experment names to upper case.
+
+
+    Parameters
+    ----------
+    modes : list of str
+        list of fire experiment names
+        
+
+    Returns
+    -------
+    mlist : list of str
+        list of converted experiment names
+
+    """
+
     mlist = []
     for mode in modes:
         old_name = str(mode)
@@ -40,22 +57,28 @@ def set_levs(nmax, depth, largest=5, sym=True, sign=True, zmax="None"):
     ----------
     nmax : int
         exponent of maximum number
+
     depth : int
         number of iterations used down to scales of 10**(nmax - depth)
+    
     largest : {5, 8}, optional
-        set the largest number in the base array either to 5 or 8
+        set the largest number in the base array either to 5 or 8 (Default value = 5)
+    
     sym : {True, False}, optional
-        switch if levels are symmetric around origin
+        switch if levels are symmetric around origin (Default value = True)
+    
     sign : {True, False}, optional
-        switches sign if negative
+        switches sign if negative (Default value = True)
+    
     zmax : float, optional, default = 'none'
-        limiter for levels, |levs| > zmax are not allowed
+        limiter for levels, |levs| > zmax are not allowed (Default value = "None")
+
 
     Returns
-    --------
-    levs : np.array
-        set of non-linear levels
-
+    -------
+     : np.array
+        non-linear color levels        
+    
     """
 
     # nmax:
@@ -131,6 +154,79 @@ def forcing_overview_plot(
         "darkgreen",
     ],
 ):
+    """
+    Creates a forcing overview plot using bars.
+    
+
+    Parameters
+    ----------
+    forc_stats : xr.Dataset
+        dataset contiaing the forcing values
+
+    stats_method : {"ensemble", "nudged"}, optional
+        simulation method to be used
+        (Default value = "ensemble")
+
+    alpha_method : {"confidence", "mode_range", "agree_with_nudged"}, optional
+        method on which it is decided to use a alpha value for the bar plot
+        (Default value = "confidence")
+
+        
+        * "confidence": based on confidence interval of ensemble statistics
+        * "mode_range": if mean across fire modes is larger than std
+        * "agree_with_nudged": if mode mean values agree in sign between 
+          nudged and ensemble runs
+
+    only_plot_modemean : {True, False}, optional
+        swtich to plot only fire mode mean
+        (Default value = False)
+
+    add_nudged : {True, False}, optional
+        switch if nudged values are added as small horizontal lines
+        (Default value = False)
+
+    ylim : float, optional
+        upper limit of y-axis
+        (Default value = 1)
+
+    title : str, optional
+        title to the plot    
+        (Default value = None)
+
+    ylabel : str, optional
+        label added to the y-axis
+        (Default value = None)
+
+    ax : matplotlib.axis, optional
+        already existing axis where plot is added,
+        if `None`, an axis is created (Default value = None).
+
+    legend_labelsize : int, optional
+        fontsize of legend labels
+        (Default value = 16)
+
+    print_condition_label : {True, False}, optional
+        switch if alpha condition is print onto plot 
+        (Default value = True)
+
+    global_values : {True, False}, optional
+        switch, if False, three predefined region label are printed
+        (Default value = False)
+
+    varnames : list, optional
+        list of variable names that are selected and plotted
+
+    colors : list, optional
+        list of colors to be plotted for each variable
+        length of color list needs to be equal to `len(varnames)`
+
+        
+
+    Returns
+    -------
+    None
+
+    """
 
     if "sky" in forc_stats.coords:
         nrows = 2
@@ -314,6 +410,48 @@ def colored_contours(
     title=None,
     cmap=plt.cm.inferno,
 ):
+    """
+    Plots colored contours to visualize temporal progression.
+
+
+    Parameters
+    ----------
+    dth : xr.Dataset
+        dataset containing variable to be plotted
+        
+    it_start : int, optional
+        time index where plotting is started
+        (Default value = 120)
+
+    it_end : int, optional
+        time index where plotting ends (excluding)
+        (Default value = 240)
+
+    it_step : int, optional
+        size of time stepping
+        (Default value = 12)
+
+    vname : str, optional
+        variable name (included in `dth`)
+        (Default value = "tpot")
+
+    value_thresh : float, optional
+        value for which contour is plotted
+        (Default value = 4.0)
+
+    title : str, optional
+        title print to the plot
+        (Default value = None)
+
+    cmap : matplotlib.colormap, optional
+        colormap for sequentially increasing times
+        (Default value = plt.cm.inferno)
+
+
+    Returns
+    -------
+    None
+    """
 
     for it in range(it_start, it_end, it_step):
         irel = (1.0 * it - it_start) / (it_end - it_start)
@@ -346,6 +484,36 @@ def colored_contours(
 
 
 def plot_diff(vin, method="timemean", ylabel=None, title=None):
+   
+    """
+    Plot variable differences as function of latitude.
+
+
+    Parameters
+    ----------
+    vin : xr.DataArray
+        variable to be plotted
+        
+    method : {"timemean", None}, optional
+        defines a statistical method applied before plotting
+
+        * "timemean" : calculates temporal average
+        * `None` or else : nothing is changed
+
+        (Default value = "timemean")
+
+    ylabel : str, optional
+        label name printed at y-axis
+        (Default value = None)
+
+    title : str, optional
+        title print to the plot
+        (Default value = None)
+
+    Returns
+    -------
+
+    """
 
     v = vin
     lat = v.lat
@@ -393,6 +561,47 @@ def plot_diff(vin, method="timemean", ylabel=None, title=None):
 def plot_diff_ts(
     vin, method="globalmean", style="errorbar", add_nudged=False, relative=False
 ):
+
+    """
+    Plot variable differences as function of time (i.e. months)
+
+
+    Parameters
+    ----------
+    vin : xr.DataArray
+        variable to be plotted
+        
+    method : {"globalmean", "shmean", "nhmean", "keep"}, optional
+        defines a statistical method applied before plotting
+
+        * "globalmean" : calculates global average
+        * "shmean" : calculates Southern hemisphere average
+        * "nhmean" : calculate Northern hemisphere average
+        * "keep" : nothing is changed
+
+        (Default value = "globalmean")
+
+    style : {"errorbar", "bar"}, optional
+        selects plotting style
+
+        * "errorbar" : values are plotted as symbols with errorbars
+        * "bar" : values are plotted as vertical bars
+
+        (Default value = "errorbar")
+
+    add_nudged : {True, False}, optional
+        if nudged data should be added to the ensemble data plot
+        (Default value = False)
+
+    relative : {True, False}, optional
+        switch if anomalies are plotted relative to a reference ("fire0.0")
+        (Default value = False)
+
+
+    Returns
+    -------
+
+    """
 
     time = np.array([1, 2, 3])
     v = vin.resample({"time": "1M"}).mean()
