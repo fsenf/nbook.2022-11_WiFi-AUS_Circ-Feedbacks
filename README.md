@@ -16,7 +16,9 @@ An **overview** is provided [here](nbooks/00-Overview.ipynb) as starting point. 
 
 
 ## Underlying Data
-The underlying post-processed data have been published at zenodo under ???
+The underlying post-processed data have been published at zenodo under [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7568466.svg)](https://doi.org/10.5281/zenodo.7568466)
+
+
 
 
 ## Python Environment and Dependencies
