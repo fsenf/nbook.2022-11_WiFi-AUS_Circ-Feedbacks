@@ -1,6 +1,6 @@
 # Jupyter Notebooks for Plotting Analysis of the "Circulation Responses for WiFi-AUS" study
 
-[![DOI](https://zenodo.org/badge/321327613.svg)](https://zenodo.org/badge/latestdoi/321327613)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7575809.svg)](https://doi.org/10.5281/zenodo.7575809)
 
 
 ## Paper
