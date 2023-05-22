@@ -683,3 +683,123 @@ def plot_diff_ts(
 
 ######################################################################
 ######################################################################
+
+
+def plot_diff_ave(
+    vin, method="globalmean", style="errorbar", add_nudged=False, relative=False
+):
+
+    """
+    Plot variable differences as function of time (i.e. months)
+
+
+    Parameters
+    ----------
+    vin : xr.DataArray
+        variable to be plotted
+        
+    method : {"globalmean", "shmean", "nhmean", "keep"}, optional
+        defines a statistical method applied before plotting
+
+        * "globalmean" : calculates global average
+        * "shmean" : calculates Southern hemisphere average
+        * "nhmean" : calculate Northern hemisphere average
+        * "keep" : nothing is changed
+
+        (Default value = "globalmean")
+
+    style : {"errorbar", "bar"}, optional
+        selects plotting style
+
+        * "errorbar" : values are plotted as symbols with errorbars
+        * "bar" : values are plotted as vertical bars
+
+        (Default value = "errorbar")
+
+    add_nudged : {True, False}, optional
+        if nudged data should be added to the ensemble data plot
+        (Default value = False)
+
+    relative : {True, False}, optional
+        switch if anomalies are plotted relative to a reference ("fire0.0")
+        (Default value = False)
+
+
+    Returns
+    -------
+
+    """
+
+    v = vin
+    if method == "globalmean":
+        v = glob_mean(v)
+    elif method == "shmean":
+        v = sh_mean(v)
+    elif method == "nhmean":
+        v = nh_mean(v)
+    elif method == "keep":
+        v = v
+
+    v.load()
+    stats = ens_stat(v)
+
+    modelist = stats.mode
+    i = 0
+
+    for mode in modelist:
+
+        vm = stats.sel(mode=mode, stats="mean").squeeze()
+
+        # upper & lower bounds
+        dv = stats.sel(mode=mode, stats="confidence").squeeze()
+
+        if relative:
+            vref = stats.sel(mode=mode, stats="reference").squeeze()
+
+            vm = 100 * vm / vref
+            dv = 100 * dv / vref
+
+        # line, =
+        if style == "errorbar":
+            plt.errorbar(0.1 * (i - 2), vm, yerr=dv, marker="o", lw=1)
+        elif style == "bar":
+            plt.bar(
+                0.15 * (i - 1.5),
+                vm,
+                width=0.08,
+                yerr=dv,
+                lw=1,
+                error_kw={"alpha": 0.3, "color": "lightgray", "lw": 1},
+                label=str(mode.data),
+            )
+
+        i += 1
+
+    try:
+        plt.ylabel("%s \n (%s)" % (v.name, v.units))
+        plt.title(v.long_name, fontweight="bold")
+    except:
+        pass
+
+    if add_nudged:
+        plt.gca().set_prop_cycle(None)
+        i = 0
+        for mode in modelist:
+            vref = v.sel(ensemble="nudged", mode="fire0.0").squeeze()
+            diff = (v.sel(ensemble="nudged", mode=mode) - vref).squeeze()
+            #            plt.plot(time + 0.15*(i-2.1), diff, marker = '*', lw = 0, ms = 20, mew = 2, mfc = 'w')
+
+            if relative:
+                diff = 100 * diff / vref
+
+            plt.bar(
+                0.15 * (i - 2.0),
+                diff,
+                width=0.04,
+                alpha=0.3,
+                label=str(mode.data),
+            )
+            i += 1
+
+    return
+        

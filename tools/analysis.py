@@ -484,6 +484,9 @@ def ens_stat(vin):
     conf = conf_difference.expand_dims("stats")
     conf["stats"] = ["confidence"]
 
+    var = var_difference.expand_dims("stats")
+    var["stats"] = ["variance"]
+
     upper = upper.expand_dims("stats")
     upper["stats"] = ["upper"]
 
@@ -495,7 +498,7 @@ def ens_stat(vin):
     )  # expand ref to each fire mode
     ref["stats"] = ["reference"]
 
-    vstat = xr.concat([mean, conf, upper, lower, ref], dim="stats")
+    vstat = xr.concat([mean, conf, upper, lower, ref, var], dim="stats")
 
     vstat.attrs = v.attrs
 
