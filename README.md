@@ -6,9 +6,9 @@
 ## Paper
 This is a collection of jupyter notebooks that have been used to prepare plots for the paper project
 
-Senf, F., B. Heinold, A. Kubin, J. Müller, R. Schrödner, and I. Tegen, **How the extreme 2019-2020 Australian wildfire impacted on global circulation and adjustments**. prepared for Atmos. Chem .Phys.,.
+Senf, F., B. Heinold, A. Kubin, J. Müller, R. Schrödner, and I. Tegen, **How the extreme 2019-2020 Australian wildfire impacted on global circulation and adjustments**. submitted to Atmos. Chem .Phys..
 
-A pre-print version of the manuscript can be downloaded at ???
+A pre-print version of the manuscript can be downloaded at https://egusphere.copernicus.org/preprints/2023/egusphere-2023-113/.
 
 
 ## Overview
